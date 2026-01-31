@@ -163,8 +163,6 @@ if (config.models?.providers?.anthropic?.models) {
     }
 }
 
-
-
 // Gateway configuration
 config.gateway.port = 18789;
 config.gateway.mode = 'local';
@@ -260,6 +258,23 @@ if (isOpenAI) {
     config.agents.defaults.models['anthropic/claude-sonnet-4-5-20250929'] = { alias: 'Sonnet 4.5' };
     config.agents.defaults.models['anthropic/claude-haiku-4-5-20251001'] = { alias: 'Haiku 4.5' };
     config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5-20251101';
+} else if (process.env.MOONSHOT_API_KEY) {
+    // Moonshot (Kimi) configuration
+    console.log('Configuring Moonshot (Kimi) provider');
+    config.models = config.models || {};
+    config.models.mode = 'merge';
+    config.models.providers = config.models.providers || {};
+    config.models.providers.moonshot = {
+        baseUrl: 'https://api.moonshot.ai/v1',
+        apiKey: process.env.MOONSHOT_API_KEY,
+        api: 'openai-completions',
+        models: [
+            { id: 'kimi-k2.5', name: 'Kimi K2.5', contextWindow: 256000, maxTokens: 8192 }
+        ]
+    };
+    config.agents.defaults.models = config.agents.defaults.models || {};
+    config.agents.defaults.models['moonshot/kimi-k2.5'] = { alias: 'Kimi K2.5' };
+    config.agents.defaults.model.primary = 'moonshot/kimi-k2.5';
 } else {
     // Default to Anthropic without custom base URL (uses built-in pi-ai catalog)
     config.agents.defaults.model.primary = 'anthropic/claude-opus-4-5';
